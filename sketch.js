@@ -144,7 +144,7 @@ class NodeManager {
         let mainParticleManagerIndex = this.particleManagers.length - 1;
         for (var i = 0; i < this.particleManagers.length - 1; i++) {
             if (p5.Vector.dist(this.particleManagers[i].basePosition, this.particleManagers[mainParticleManagerIndex].basePosition) < HIT_FIELD) {
-                this.particleManagers[mainParticleManagerIndex].growUp(1.1);
+                this.particleManagers[mainParticleManagerIndex].growUp(1.1, this.particleManagers[i].hue);
                 this.particleManagers.splice(i, 1);
                 this.particles.splice(i, 1);
                 break;
@@ -194,6 +194,11 @@ class MainParticleManager extends ParticleManager {
     */ 
     constructor(_position, _hue) {
         super(_position, _hue, random(10, 30));
+        this.hue = [];
+        for (var i = 0; i < PARTICLE_NUM; i++) {
+            this.hue[i] = 255;
+        }
+        this.nextIndex = 0;
     }
 
     /*
@@ -203,8 +208,12 @@ class MainParticleManager extends ParticleManager {
         push();
         this.update();
         this.connectMyGroup();
-        fill(255, 0, 255);
         for (var i = 0; i < PARTICLE_NUM; i++) {
+            if (i < this.nextIndex) {
+                fill(this.hue[i], 255, 255);
+            } else {
+                fill(255, 0, 255);
+            }
             this.particles[i].display();
         }
         pop();
@@ -213,11 +222,13 @@ class MainParticleManager extends ParticleManager {
     /*
     * _size: ParticleManagerのradiusの成長度合い(乗算により拡大される)
     */
-    growUp(_size) {
+    growUp(_size, hue) {
         for (var i = 0; i < this.particles.length; i++) {
             this.particles[i].relativePosition.mult(_size);
         }
         this.radius = this.particles[0].relativePosition.mag();
+        this.hue[this.nextIndex] = hue;
+        this.nextIndex++;
     }
 }
 
